@@ -34,6 +34,14 @@ function overwrite()
             add_option('forgot_mail_cwd',stripslashes($_POST['message']));
         }
 
+        if(get_option('forgot_mail_cwd_subject')!==false)
+        {
+            update_option('forgot_mail_cwd_subject',stripslashes($_POST['subject']));
+        }
+        else
+        {
+            add_option('forgot_mail_cwd_subject',stripslashes($_POST['subject']));
+        }
     }
 
      if(!get_option('forgot_mail_cwd'))
@@ -50,7 +58,8 @@ function overwrite()
 
     echo '<form action="" method="post">';
     echo '<h2>Forgot password custom email:</h2><br><br>
-    <textarea rows=10 cols=40 name="message" id="message" >'.get_option('forgot_mail_cwd').'</textarea><br><br>';
+    subject:<input type="text" name="subject" id="subject" value="'.get_option('forgot_mail_cwd_subject').'"  /><br><br>
+    body:<textarea rows=10 cols=40 name="message" id="message" >'.get_option('forgot_mail_cwd').'</textarea><br><br>';
     echo '<b>(Note:)&nbsp;</b>Use placeholders <b>%username%</b> for username and <b>%reseturl%</b> for reset url<br><br>';
     echo '<input type="submit" name="setmesssage" value="Ok" class="button-primary">';
     echo '</form>';
@@ -64,7 +73,7 @@ function my_retrieve_password_subject_filter($old_subject)
 {
 
     $blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
-    $subject = sprintf( __('[%s] Password Reset'), $blogname );
+    $subject = get_option('forgot_mail_cwd_subject');
 
     return $subject;
 }
