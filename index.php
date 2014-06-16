@@ -42,6 +42,25 @@ function overwrite()
         {
             add_option('forgot_mail_cwd_subject',stripslashes($_POST['subject']));
         }
+
+        if(get_option('forgot_mail_cwd_from')!==false)
+        {
+            update_option('forgot_mail_cwd_from',stripslashes($_POST['fromaddr']));
+        }
+        else
+        {
+            add_option('forgot_mail_cwd_from',stripslashes($_POST['fromaddr']));
+        }
+
+        if(get_option('forgot_mail_cwd_fromname')!==false)
+        {
+            update_option('forgot_mail_cwd_fromname',stripslashes($_POST['fromname']));
+        }
+        else
+        {
+            add_option('forgot_mail_cwd_fromname',stripslashes($_POST['fromname']));
+        }
+
     }
 
      if(!get_option('forgot_mail_cwd'))
@@ -57,11 +76,13 @@ function overwrite()
      }
 
     echo '<form action="" method="post">';
-    echo '<h2>Forgot password custom email:</h2><br><br>
-    subject:<input type="text" name="subject" id="subject" value="'.get_option('forgot_mail_cwd_subject').'"  /><br><br>
-    body:<textarea rows=10 cols=40 name="message" id="message" >'.get_option('forgot_mail_cwd').'</textarea><br><br>';
+    echo '<h2>Forgot password custom email:</h2><br><br>';
+    echo 'from address:<input type="text" name="fromaddr" id="fromaddr" value="'.get_option('forgot_mail_cwd_from').'"  /><br><br>';
+    echo 'from name:<input type="text" name="fromname" id="fromname" value="'.get_option('forgot_mail_cwd_fromname').'"  /><br><br>';
+    echo 'subject:<input type="text" name="subject" id="subject" value="'.get_option('forgot_mail_cwd_subject').'"  /><br><br>';
+    echo 'body:<textarea rows=10 cols=40 name="message" id="message" >'.get_option('forgot_mail_cwd').'</textarea><br><br>';
     echo '<b>(Note:)&nbsp;</b>Use placeholders <b>%username%</b> for username and <b>%reseturl%</b> for reset url<br><br>';
-    echo '<input type="submit" name="setmesssage" value="Ok" class="button-primary">';
+    echo '<input type="submit" name="setmesssage" value="Ok" class="button-primary"><br><br>';
     echo '</form>';
 
 
@@ -74,7 +95,7 @@ function my_retrieve_password_subject_filter($old_subject)
 
     $blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
     $subject = get_option('forgot_mail_cwd_subject');
-
+    $subject = esc_attr($subject);
     return $subject;
 }
 
@@ -104,9 +125,23 @@ function my_retrieve_password_message_filter($old_message, $key)
     return $message;
 }
 
+function my_retrieve_password_from_filter( $original_email_address ) {
+    $fromaddr = get_option('forgot_mail_cwd_from');
+    $fromaddr = is_email($fromaddr);
+    return $fromaddr;
+}
+
+function my_retrieve_password_fromname_filter( $original_email_from ) {
+    $fromname = get_option('forgot_mail_cwd_fromname');
+    $fromname = esc_attr($fromname);
+    return $fromname;
+}
+
 // To get these filters up and running:
 add_filter ( 'retrieve_password_title', 'my_retrieve_password_subject_filter', 10, 1 );
 add_filter ( 'retrieve_password_message', 'my_retrieve_password_message_filter', 10, 2 );
+add_filter( 'wp_mail_from', 'my_retrieve_password_from_filter', 10, 3 );
+add_filter( 'wp_mail_from_name', 'my_retrieve_password_fromname_filter', 10, 4 );
 
 
     add_filter( 'wp_mail_content_type', 'set_content_type' );
